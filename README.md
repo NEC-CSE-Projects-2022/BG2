@@ -1,8 +1,8 @@
 
-# BG2 – Intelligent Pest Classification & Remedy Recommendation System
+# BG2 – INTELLIGENT PEST CLASSIFICATION AND REMEDY RECOMMENDATION SYSTEM USING VISION TRANSFORMERS AND DOMAIN-AWARE SUMMARIZATION
 
 ## Team Info
-- **22471A0580 — Satwika Chakka** ( [LinkedIn](https://linkedin.com/in/xxxxxxxxxx) )
+- **22471A0580 — Satwika Jahnavi Chakka** ( [LinkedIn](https://linkedin.com/in/satwikajahnavi) )
 _Work Done: Model training, evaluation, preprocessing_
 
 - 22471A0590 — **Thrisony Gayam** ( [LinkedIn](https://linkedin.com/in/xxxxxxxxxx) )
@@ -21,9 +21,9 @@ Farmers face major crop losses due to delayed or inaccurate pest identification,
 ---
 
 ## Paper Reference (Inspiration)
-👉 **[Paper Title xxxxxxxxxx
-  – Author Names xxxxxxxxxx
- ](Paper URL here)**
+👉 **FasterPest: A Multi-Task Classification Model for Rice Pest Recognition
+  – Author Names Xiaoyun Zhan; Cong Zhang; Zheng Wang; Yuantao Han; Peng Xiong; Linfeng He
+ ]((https://ieeexplore.ieee.org/document/10734263))**
 Original conference/IEEE paper used as inspiration for the model.
 
 ---
