@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pest Detection Upload</title>
+    <link rel="stylesheet" href="../static/Upload.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='Home.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='Navbar.css') }}">
+    <style>
+        
+        .upload-container { max-width: 900px; margin: 2rem auto; padding: 2rem; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .upload-section { margin-bottom: 2rem; padding: 2rem; border: 2px dashed #e5e7eb; border-radius: 12px; text-align: center; transition: all 0.3s ease; }
+        .upload-section:hover { border-color: #22c55e; background: #f0fdf4; }
+        .upload-section h3 { color: #059669; margin-bottom: 1rem; }
+        .file-input { margin: 1rem 0; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; width: 100%; max-width: 400px; }
+        .upload-btn { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 1rem; }
+        .upload-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3); }
+        .upload-btn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+        .tabs { display: flex; margin-bottom: 2rem; background: #f8fafc; border-radius: 12px; padding: 4px; }
+        .tab-button { flex: 1; padding: 12px 20px; border: none; background: transparent; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+        .tab-button.active { background: white; color: #059669; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .image-preview { margin: 1.5rem 0; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 12px; background: #f9fafb; display: none; }
+        .image-preview img { max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .loading { display: none; text-align: center; padding: 2rem; color: #059669; }
+        .loading .spinner { border: 3px solid #f3f4f6; border-top: 3px solid #059669; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error-message { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 1rem; border-radius: 8px; margin: 1rem 0; display: none; }
+        .success-message { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; padding: 1rem; border-radius: 8px; margin: 1rem 0; display: none; }
+        .results-container { margin: 2rem 0; padding: 2rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb; display: none; }
+        .result-item { background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .pest-detected { border-left: 4px solid #dc2626; }
+        .not-pest { border-left: 4px solid #16a34a; }
+        .pesticide-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .pesticide-item { background: #f8fafc; border: 2px solid #e5e7eb; border-radius: 10px; padding: 0.75rem; text-align: center; transition: all 0.3s ease; }
+        .pesticide-item:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); border-color: #22c55e; }
+        .pesticide-item img { width: 100%; height: 100px; object-fit: cover; border-radius: 6px; margin-bottom: 0.5rem; border: 1px solid #e5e7eb; }
+        .pesticide-name { font-size: 0.85rem; font-weight: 600; color: #374151; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .section-header { display: flex; align-items: center; margin: 1.5rem 0 1rem 0; font-size: 1rem; font-weight: 600; color: #374151; }
+        .section-header span { margin-right: 0.5rem; }
+        .section-header::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; margin-left: 1rem; }
+   
+   </style>
+</head>
+<body>
+     <nav class="navbar">
+    <div class="navbar-logo" onclick="window.location.href='/'" style="cursor:pointer;">
+      <span class="logo-icon">🌿</span> AgriGuard
+    </div>
+
+    <button class="navbar-toggle" id="navbarToggle">&#9776;</button>
+   
+  </nav>
+
+
+    <main style="padding-top: 120px;">
+        <div class="upload-container">
+            <h1 style="text-align: center; color: #059669; margin-bottom: 1rem;">🐛 Smart Pest Detection</h1>
+            <p style="text-align: center; color: #6b7280; margin-bottom: 2rem;">Upload images to detect pests and get pesticide recommendations</p>
+            
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab(event, 'single-upload')">📸 Single Image</button>
+                <button class="tab-button" onclick="switchTab(event, 'batch-upload')">📁 Batch Upload</button>
+            </div>
+            
+            <div id="single-upload" class="tab-content active">
+                <div class="upload-section">
+                    <h3>Upload Single Image</h3>
+                    <p>Upload a single image to detect and classify pests</p>
+                    <form id="single-form" enctype="multipart/form-data">
+                        <input type="file" name="image" id="single-file-input" accept="image/*" class="file-input" required>
+                        <div id="image-preview" class="image-preview">
+                            <h4 style="color: #059669; margin-bottom: 1rem;">📷 Preview:</h4>
+                            <img id="preview-img" src="" alt="Preview">
+                            <div style="margin-top: 1rem;">
+                                <strong id="file-name"></strong><br>
+                                <span id="file-size" style="color: #6b7280;"></span>
+                            </div>
+                        </div>
+                        <div id="loading" class="loading">
+                            <div class="spinner"></div>
+                            <p>🔍 Analyzing image with AI...</p>
+                        </div>
+                        <div id="error-message" class="error-message"></div>
+                        <div id="success-message" class="success-message"></div>
+                        <br>
+                        <button type="submit" id="analyze-btn" class="upload-btn" disabled>🔍 Analyze Image</button>
+                    </form>
+                </div>
+                <div id="results-container" class="results-container">
+                    <h3 style="color: #059669; margin-bottom: 1rem;">📊 Analysis Results</h3>
+                    <div id="results-content"></div>
+                </div>
+            </div>
+            
+            <div id="batch-upload" class="tab-content">
+                <div class="upload-section">
+                    <h3>📁 Upload Folder of Images</h3>
+                    <p>Select a folder containing multiple images for batch analysis</p>
+                    <form action="/predict-batch" method="POST" enctype="multipart/form-data">
+                        <input type="file" name="images" webkitdirectory directory multiple class="file-input" required>
+                        <br>
+                        <button type="submit" class="upload-btn">🚀 Analyze Batch</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function switchTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) { tabcontent[i].classList.remove("active"); }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            if (tabName === 'single-upload') { resetSingleUploadForm(); }
+        }
+
+        function resetSingleUploadForm() {
+            document.getElementById('single-form').reset();
+            document.getElementById('image-preview').style.display = 'none';
+            document.getElementById('analyze-btn').disabled = true;
+            hideMessages();
+            document.getElementById('results-container').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        document.getElementById('single-file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('image-preview');
+            const previewImg = document.getElementById('preview-img');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            hideMessages();
+            document.getElementById('results-container').style.display = 'none';
+            if (file) {
+                if (!file.type.startsWith('image/')) { showError('Please select a valid image file.'); return; }
+                if (file.size > 10 * 1024 * 1024) { showError('File size must be less than 10MB.'); return; }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    preview.style.display = 'block';
+                    analyzeBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+                analyzeBtn.disabled = true;
+            }
+        });
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function hideMessages() {
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorMsg = document.getElementById('error-message');
+            errorMsg.textContent = '❌ ' + message;
+            errorMsg.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const successMsg = document.getElementById('success-message');
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+        }
+
+        function displayResults(result) {
+            const resultsContainer = document.getElementById('results-container');
+            const resultsContent = document.getElementById('results-content');
+            let resultClass = result.is_pest ? 'pest-detected' : 'not-pest';
+            let statusIcon = result.is_pest ? '🐛' : '✅';
+            let statusColor = result.is_pest ? '#dc2626' : '#16a34a';
+            
+            let pesticideGalleryHtml = '';
+            if (result.is_pest && result.pesticide_images && result.pesticide_images.length > 0) {
+                let pesticideItems = result.pesticide_images.map(pesticide => `
+                    <div class="pesticide-item">
+                        <img src="${pesticide.image_url}" alt="${pesticide.name}" />
+                        <p class="pesticide-name" title="${pesticide.name}">${pesticide.name}</p>
+                    </div>
+                `).join('');
+                pesticideGalleryHtml = `
+                    <div class="section-header"><span>💊</span> Recommended Pesticides</div>
+                    <div class="pesticide-gallery">${pesticideItems}</div>
+                `;
+            }
+            
+            resultsContent.innerHTML = `
+                <div class="result-item ${resultClass}">
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <span style="font-size: 2.5rem; margin-right: 1rem;">${statusIcon}</span>
+                        <div>
+                            <h4 style="margin: 0; color: ${statusColor}; font-size: 1.5rem;">
+                                ${result.is_pest ? `Pest Detected: ${result.prediction}` : 'No Pest Detected'}
+                            </h4>
+                            <p style="margin: 0.25rem 0 0 0; color: #6b7280;">
+                                Confidence: <strong>${Math.round(result.confidence * 100)}%</strong>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="section-header"><span>📋</span> Description</div>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                        <p style="margin: 0; color: #4b5563; line-height: 1.6;">${result.description}</p>
+                    </div>
+                    
+                    ${result.prevention ? `
+                    <div class="section-header"><span>🛡️</span> Prevention Tips</div>
+                    <div style="background: #f0fdf4; padding: 1rem; border-radius: 8px; border: 1px solid #bbf7d0;">
+                        <p style="margin: 0; color: #15803d; line-height: 1.6;">${result.prevention}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- The pesticide text block is now removed, only the image gallery below will be shown -->
+                    
+                    ${pesticideGalleryHtml}
+                    
+                    <div style="margin-top: 2rem; text-align: center;">
+                        <button onclick="resetSingleUploadForm()" class="upload-btn" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
+                            🔄 Analyze Another Image
+                        </button>
+                    </div>
+                </div>
+            `;
+            resultsContainer.style.display = 'block';
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.getElementById('single-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const loading = document.getElementById('loading');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            hideMessages();
+            document.getElementById('results-container').style.display = 'none';
+            loading.style.display = 'block';
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = '🔄 Analyzing...';
+            try {
+                const response = await fetch('/predict', { method: 'POST', body: formData });
+                if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
+                const result = await response.json();
+                if (result.error) {
+                    showError(`Analysis failed: ${result.error}`);
+                } else {
+                    showSuccess('✅ Analysis complete!');
+                    displayResults(result);
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showError(`Network error: ${error.message}. Please try again.`);
+            } finally {
+                loading.style.display = 'none';
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = '🔍 Analyze Image';
+            }
+        });
+    </script>
+</body>
+</html>
